@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-and-run:
-    runs-on: [ master] 
+    runs-on: [ master-of-cluster ] 
 
     steps:
       - name: Checkout code
