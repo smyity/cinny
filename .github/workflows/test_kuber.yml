@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-and-run:
-    runs-on: [ master-of-cluster ] 
+    runs-on: [ arc-runner-set ] 
 
     steps:
       - name: Checkout code
@@ -15,7 +15,7 @@ jobs:
         run: |
           # Сборка образа с тегом cinny:custom и пониженным приоритетом, чтобы ВМ была доступна
           # Можно так же ограничить память: docker build --memory="2g" -t cinny:custom .
-          nice -n 19 docker build -t cinny:custom .
+          nice -n 19 docker build -t cinny:custom-1.1 .
 
       # - name: Deploy Container
       #   run: |
