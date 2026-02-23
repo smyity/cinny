@@ -1,13 +1,31 @@
-name: Kubernetes Auto-Pod Test
-on: push
+name: Build Cinny on Master
+on:
+  push:
+    branches: [ dev ]
 
 jobs:
-  k8s-job:
-    runs-on: master
+  build-and-run:
+    runs-on: [ master] 
+
     steps:
-      - name: Deploy Test Pod
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
         run: |
-          # Создаем под и проверяем его статус
-          kubectl run github-test-pod --image=nginx --restart=Never
-          sleep 5
-          kubectl get pods
+          # Сборка образа с тегом cinny:custom
+          docker build -t cinny:custom .
+
+      # - name: Deploy Container
+      #   run: |
+      #     # Останавливаем старый контейнер, если он есть
+      #     docker stop cinny-app || true
+      #     docker rm cinny-app || true
+          
+      #     # Запускаем новый
+      #     # Порт 8080 взят для примера, измените на нужный
+      #     docker run -d \
+      #       --name cinny-app \
+      #       --restart unless-stopped \
+      #       -p 8080:80 \
+      #       cinny:latest
