@@ -1,32 +1,6 @@
-name: Build Cinny on Master
-on:
-  push:
-    branches: [ dev ]
-
-jobs:
-  build-and-run:
-    runs-on: [ arc-runner-set ] 
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: |
-          # Сборка образа с тегом cinny:custom и пониженным приоритетом, чтобы ВМ была доступна
-          # Можно так же ограничить память: docker build --memory="2g" -t cinny:custom .
-          nice -n 19 docker build -t cinny:custom-1.1 .
-
-      # - name: Deploy Container
-      #   run: |
-      #     # Останавливаем старый контейнер, если он есть
-      #     docker stop cinny-app || true
-      #     docker rm cinny-app || true
-          
-      #     # Запускаем новый
-      #     # Порт 8080 взят для примера, измените на нужный
-      #     docker run -d \
-      #       --name cinny-app \
-      #       --restart unless-stopped \
-      #       -p 8080:80 \
-      #       cinny:latest
+- name: Build with Kaniko
+  uses: aevea/action-kaniko@master
+  with:
+    image: smyity/cinny
+    tag: latest
+    cache: true
