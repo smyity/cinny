@@ -3,7 +3,7 @@ on: push
 
 jobs:
   k8s-job:
-    runs-on: self-hosted
+    runs-on: master
     steps:
       - name: Deploy Test Pod
         run: |
