@@ -1,0 +1,13 @@
+name: Kubernetes Auto-Pod Test
+on: push
+
+jobs:
+  k8s-job:
+    runs-on: self-hosted
+    steps:
+      - name: Deploy Test Pod
+        run: |
+          # Создаем под и проверяем его статус
+          kubectl run github-test-pod --image=nginx --restart=Never
+          sleep 5
+          kubectl get pods
