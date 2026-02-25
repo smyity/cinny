@@ -14,12 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          # Указываем использовать Docker-демон внутри пода (dind)
-          driver: docker-container
-
       - name: Build and Push to Local Registry
         run: |
           # 51.250.79.226:5000 — адрес вашего реестра на мастере
