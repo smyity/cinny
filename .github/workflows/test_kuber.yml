@@ -2,24 +2,26 @@ name: Build and Push to VM Registry
 
 on:
   push:
-    branches: [ dev ]  # Запуск при пуше в main
-  workflow_dispatch:      # Возможность запустить вручную кнопкой
+    branches: [ dev ]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
-    # Имя должно СТРОГО совпадать с названием вашего Helm-релиза
     runs-on: my-runner-set 
+    # Запускаем всю работу внутри образа Kaniko
+    container:
+      image: gcr.io/kaniko-project/executor:debug # debug версия нужна для shell
+      options: --user root
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build and Push with Kaniko
-        uses: gcr.io/kaniko-project/executor:latest
-        with:
-          args: >-
-            --context=${{ github.workspace }}
-            --dockerfile=${{ github.workspace }}/Dockerfile
-            --destination=51.250.79.226:5000/my-app:${{ github.sha }}
-            --insecure
+      - name: Build and Push
+        run: |
+          /kaniko/executor \
+            --context "${{ github.workspace }}" \
+            --dockerfile "${{ github.workspace }}/Dockerfile" \
+            --destination "51.250.79.226:5000/my-app:${{ github.sha }}" \
+            --insecure \
             --skip-tls-verify
