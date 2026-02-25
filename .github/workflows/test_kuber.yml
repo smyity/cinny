@@ -13,16 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Скачиваем исполнитель Kaniko напрямую в раннер
-      - name: Build and Push with Kaniko
-        run: |
-          # Используем готовый экшен-обертку, который не требует docker-демона
-          # Или запускаем через официальный образ напрямую, но БЕЗ ключевого слова container:
-          docker run --rm \
-            -v ${{ github.workspace }}:/workspace \
-            gcr.io/kaniko-project/executor:latest \
-            --context /workspace \
-            --dockerfile /workspace/Dockerfile \
-            --destination 51.250.79.226:5000/my-app:${{ github.sha }} \
-            --insecure \
-            --skip-tls-verify
+      - name: Kaniko build
+        uses: aevea/action-kaniko@master
+        with:
+          image: my-app
+          tag: ${{ github.sha }}
+          registry: 51.250.79.226:5000
+          insecure: true
+          # Это заставит экшен использовать бинарник, а не docker run
+          extra_args: "--skip-tls-verify" 
