@@ -9,6 +9,10 @@ jobs:
   build-and-push:
     runs-on: my-runner-set 
 
+    container:
+      image: gcr.io/kaniko-project/executor:debug
+      options: --user root
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
