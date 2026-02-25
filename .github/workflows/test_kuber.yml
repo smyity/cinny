@@ -8,20 +8,21 @@ on:
 jobs:
   build-and-push:
     runs-on: my-runner-set 
-    # Запускаем всю работу внутри образа Kaniko
-    container:
-      image: gcr.io/kaniko-project/executor:debug # debug версия нужна для shell
-      options: --user root
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build and Push
+      # Скачиваем исполнитель Kaniko напрямую в раннер
+      - name: Build and Push with Kaniko
         run: |
-          /kaniko/executor \
-            --context "${{ github.workspace }}" \
-            --dockerfile "${{ github.workspace }}/Dockerfile" \
-            --destination "51.250.79.226:5000/my-app:${{ github.sha }}" \
+          # Используем готовый экшен-обертку, который не требует docker-демона
+          # Или запускаем через официальный образ напрямую, но БЕЗ ключевого слова container:
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            gcr.io/kaniko-project/executor:latest \
+            --context /workspace \
+            --dockerfile /workspace/Dockerfile \
+            --destination 51.250.79.226:5000/my-app:${{ github.sha }} \
             --insecure \
             --skip-tls-verify
