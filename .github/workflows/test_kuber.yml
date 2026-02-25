@@ -6,19 +6,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push:
-    runs-on: my-runner-set 
-
+  build:
+    runs-on: my-runner-set
     steps:
-      - name: Checkout code
+      # Используем checkout (он работает через git, докер ему не нужен)
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Kaniko build
-        uses: aevea/action-kaniko@master
-        with:
-          image: my-app
-          tag: ${{ github.sha }}
-          registry: 51.250.79.226:5000
-          insecure: true
-          # Это заставит экшен использовать бинарник, а не docker run
-          extra_args: "--skip-tls-verify" 
+      - name: Build with Kaniko Binary
+        run: |
+          # 1. Скачиваем бинарник Kaniko (executor) прямо в раннер
+          # Мы используем curl, так как докера у нас "внутри" нет
+          curl -LO https://github.com
+          chmod +x executor
+          
+          # 2. Запускаем сборку
+          ./executor \
+            --context "${{ github.workspace }}" \
+            --dockerfile "${{ github.workspace }}/Dockerfile" \
+            --destination "51.250.79.226:5000/my-app:${{ github.sha }}" \
+            --insecure \
+            --skip-tls-verify \
+            --cache=false
