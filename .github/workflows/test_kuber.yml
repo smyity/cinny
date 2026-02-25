@@ -15,16 +15,11 @@ jobs:
 
       - name: Build with Kaniko Binary
         run: |
-          # Скачиваем в /tmp
-          curl -sSL -o /tmp/kaniko-executor https://github.com
-          chmod +x /tmp/kaniko-executor
-
-          # Запускаем, указывая кастомные директории, чтобы не лезть в корень /
-          /tmp/kaniko-executor \
+          # Бинарник уже в образе, просто запускаем его
+          kaniko \
             --context "${{ github.workspace }}" \
             --dockerfile "${{ github.workspace }}/Dockerfile" \
             --destination "51.250.79.226:5000/my-app:${{ github.sha }}" \
             --insecure \
             --skip-tls-verify \
-            --cache=false \
-            --rootless
+            --cache=false
