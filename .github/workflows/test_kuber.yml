@@ -15,24 +15,16 @@ jobs:
 
       - name: Build with Kaniko Binary
         run: |
-          # 1. Извлекаем бинарный файл из официального образа Kaniko
-          # Мы используем временный контейнер только чтобы забрать файл
-          echo "Extracting Kaniko executor from Docker image..."
-          
-          # Так как у нас нет докера внутри, мы скачаем архив образа и распакуем его
-          # Но проще всего - использовать правильную прямую ссылку на бинарник:
-          curl -sSL -o kaniko-executor https://github.com
-          
-          # 2. Проверяем, что это не HTML (должно быть ELF бинарник)
-          file kaniko-executor || echo "Downloaded file type check"
-          
-          # 3. Даем права и запускаем
-          chmod +x kaniko-executor
-          
-          ./kaniko-executor \
+          # Скачиваем в /tmp
+          curl -sSL -o /tmp/kaniko-executor https://github.com
+          chmod +x /tmp/kaniko-executor
+
+          # Запускаем, указывая кастомные директории, чтобы не лезть в корень /
+          /tmp/kaniko-executor \
             --context "${{ github.workspace }}" \
             --dockerfile "${{ github.workspace }}/Dockerfile" \
             --destination "51.250.79.226:5000/my-app:${{ github.sha }}" \
             --insecure \
             --skip-tls-verify \
-            --cache=false
+            --cache=false \
+            --rootless
