@@ -14,20 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build and Push to Local Registry
-        env:
-          DOCKER_BUILDKIT: 0  # Отключаем BuildKit
-        run: |
-          # 51.250.79.226:5000 — адрес вашего реестра на мастере
-          IMAGE_NAME="51.250.79.226:5000/my-app:${{ github.sha }}"
-          
-          echo "Building $IMAGE_NAME..."
-          docker build -t $IMAGE_NAME .
-          
-          echo "Pushing to registry..."
-          docker push $IMAGE_NAME
-
-      - name: Verify Catalog
-        run: |
-          # Проверим, что образ появился в списке
-          curl http://51.250.79.226
+      - name: Build and Push with Kaniko
+        uses: gcr.io/kaniko-project/executor:latest
+        with:
+          args: >-
+            --context=${{ github.workspace }}
+            --dockerfile=${{ github.workspace }}/Dockerfile
+            --destination=51.250.79.226:5000/my-app:${{ github.sha }}
+            --insecure
+            --skip-tls-verify
