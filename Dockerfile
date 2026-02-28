@@ -1,5 +1,6 @@
 ## Builder
-FROM node:20.12.2-alpine3.18 as builder
+#FROM node:20.12.2-alpine3.18 as builder
+FROM registry.local:5000/node:20.12.2-alpine3.18 AS builder
 
 WORKDIR /src
 
