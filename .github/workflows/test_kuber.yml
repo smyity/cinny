@@ -27,7 +27,7 @@ jobs:
       - name: Build and push image
         run: |
           # Используем только надежное DNS-имя
-          IMAGE_NAME="registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}"
+          IMAGE_NAME="registry.local:5000/my-app:${{ github.sha }}"
           
           docker build -t $IMAGE_NAME .
           docker push $IMAGE_NAME
