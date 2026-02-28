@@ -16,18 +16,9 @@ jobs:
     steps:
       - name: Build image
         run: |
-          # 1. Сборка с основным именем
+          # 1. Проверяем, где мы и что тут лежит
+          pwd
+          ls -la
+          
+          # 2. Собираем (убедитесь, что Dockerfile в корне)
           docker build -t registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }} .
-          
-          # 2. Создание дополнительных тегов ОТ СОБРАННОГО ОБРАЗА
-          docker tag registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }} registry-service.arc-systems.svc.cluster.local:5000/my-app:latest
-          
-          # Если ОЧЕНЬ нужен тег по IP (не обязательно):
-          docker tag registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }} 10.108.206.244:5000/my-app:${{ github.sha }}
-
-      - name: Push to Local Registry
-        run: |
-          # Пуш всех созданных тегов
-          docker push registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}
-          docker push registry-service.arc-systems.svc.cluster.local:5000/my-app:latest
-          docker push 10.108.206.244:5000/my-app:${{ github.sha }}
