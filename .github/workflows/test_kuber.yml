@@ -14,25 +14,20 @@ jobs:
       DOCKER_HOST: tcp://localhost:2375
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Wait for Docker to be ready
-        run: |
-          until docker info; do
-            echo "Waiting for Docker..."
-            sleep 1
-          done
-
       - name: Build image
         run: |
-          # Используем адрес сервиса внутри кластера или внешний ingress
-          # В вашем helmfile это: registry.local
-          docker build -t registry.local/my-app:${{ github.sha }} .
-          docker tag registry.local/my-app:${{ github.sha }} registry.local/my-app:latest
+          # 1. Сборка с основным именем
+          docker build -t registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }} .
+          
+          # 2. Создание дополнительных тегов ОТ СОБРАННОГО ОБРАЗА
+          docker tag registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }} registry-service.arc-systems.svc.cluster.local:5000/my-app:latest
+          
+          # Если ОЧЕНЬ нужен тег по IP (не обязательно):
+          docker tag registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }} 10.108.206.244:5000/my-app:${{ github.sha }}
 
       - name: Push to Local Registry
         run: |
-          # Так как в dind прописан --insecure-registry, логин не обязателен (если не настраивали auth)
+          # Пуш всех созданных тегов
           docker push registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}
+          docker push registry-service.arc-systems.svc.cluster.local:5000/my-app:latest
           docker push 10.108.206.244:5000/my-app:${{ github.sha }}
