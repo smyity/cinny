@@ -24,28 +24,10 @@ jobs:
             sleep 1
           done
 
-      - name: Build image
+      - name: Build and push image
         run: |
-          # 1. Собираем базовый образ
-          docker build -t my-app-local .
+          # Используем только надежное DNS-имя
+          IMAGE_NAME="registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}"
           
-          # 2. Создаем три "ярлыка" (тега) для проверки
-          # Имя через hostAliases
-          docker tag my-app-local registry.local:5000/my-app:${{ github.sha }}
-          
-          # Официальное имя Kubernetes DNS
-          docker tag my-app-local registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}
-          
-          # Прямой ClusterIP
-          docker tag my-app-local 10.108.206.244:5000/my-app:${{ github.sha }}
-
-      - name: Push and Test all names
-        run: |
-          echo "--- Testing Registry DNS Name ---"
-          docker push registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}
-          
-          echo "--- Testing hostAliases Name (registry.local) ---"
-          docker push registry.local:5000/my-app:${{ github.sha }}
-          
-          echo "--- Testing Direct ClusterIP ---"
-          docker push 10.108.206.244:5000/my-app:${{ github.sha }}
+          docker build -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
