@@ -16,9 +16,15 @@ jobs:
     steps:
       - name: Build image
         run: |
-          # 1. Проверяем, где мы и что тут лежит
-          pwd
-          ls -la
+          # Собираем как обычно
+          docker build -t my-app-local .
           
-          # 2. Собираем (убедитесь, что Dockerfile в корне)
-          docker build -t registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }} .
+          # Явно вешаем теги для нашего реестра
+          docker tag my-app-local registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}
+          docker tag my-app-local registry-service.arc-systems.svc.cluster.local:5000/my-app:latest
+
+      - name: Push to Local Registry
+        run: |
+          # Теперь пушим именно те теги, которые создали выше
+          docker push registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}
+          docker push registry-service.arc-systems.svc.cluster.local:5000/my-app:latest
