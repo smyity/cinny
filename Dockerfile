@@ -12,7 +12,8 @@ RUN npm run build
 
 
 ## App
-FROM nginx:1.29.3-alpine
+#FROM nginx:1.29.3-alpine
+FROM registry.local:5000/nginx:1.29.3-alpine
 
 COPY --from=builder /src/dist /app
 COPY --from=builder /src/docker-nginx.conf /etc/nginx/conf.d/default.conf
