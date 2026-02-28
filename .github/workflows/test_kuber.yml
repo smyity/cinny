@@ -1,25 +1,38 @@
-name: Build and Push to VM Registry
+name: Build and Push to Local Registry
 
 on:
   push:
     branches: [ dev ]
-  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: my-runner-set
+    # Имя должно СТРОГО совпадать с name релиза в helmfile (arc-runner-set)
+    runs-on: arc-runner-set
+
+    # Переменная, чтобы Docker-клиент внутри раннера видел контейнер dind
+    env:
+      DOCKER_HOST: tcp://localhost:2375
+
     steps:
-      # Используем checkout (он работает через git, докер ему не нужен)
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build with Kaniko Binary
+      - name: Wait for Docker to be ready
         run: |
-          # Бинарник уже в образе, просто запускаем его
-          kaniko \
-            --context "${{ github.workspace }}" \
-            --dockerfile "${{ github.workspace }}/Dockerfile" \
-            --destination "51.250.79.226:5000/my-app:${{ github.sha }}" \
-            --insecure \
-            --skip-tls-verify \
-            --cache=false
+          until docker info; do
+            echo "Waiting for Docker..."
+            sleep 1
+          done
+
+      - name: Build image
+        run: |
+          # Используем адрес сервиса внутри кластера или внешний ingress
+          # В вашем helmfile это: registry.local
+          docker build -t registry.local/my-app:${{ github.sha }} .
+          docker tag registry.local/my-app:${{ github.sha }} registry.local/my-app:latest
+
+      - name: Push to Local Registry
+        run: |
+          # Так как в dind прописан --insecure-registry, логин не обязателен (если не настраивали auth)
+          docker push registry.local/my-app:${{ github.sha }}
+          docker push registry.local/my-app:latest
