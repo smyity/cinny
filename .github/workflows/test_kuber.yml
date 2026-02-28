@@ -26,14 +26,26 @@ jobs:
 
       - name: Build image
         run: |
-          # Используем адрес сервиса внутри кластера или внешний ingress
-          # В вашем helmfile это: registry.local
-          docker build -t registry.local/my-app:${{ github.sha }} .
-          docker tag registry.local/my-app:${{ github.sha }} registry.local/my-app:latest
+          # 1. Собираем базовый образ
+          docker build -t my-app-local .
+          
+          # 2. Создаем три "ярлыка" (тега) для проверки
+          # Имя через hostAliases
+          docker tag my-app-local registry.local:5000/my-app:${{ github.sha }}
+          
+          # Официальное имя Kubernetes DNS
+          docker tag my-app-local registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}
+          
+          # Прямой ClusterIP
+          docker tag my-app-local 10.108.206.244:5000/my-app:${{ github.sha }}
 
-      - name: Push to Local Registry
+      - name: Push and Test all names
         run: |
-          # Так как в dind прописан --insecure-registry, логин не обязателен (если не настраивали auth)
+          echo "--- Testing Registry DNS Name ---"
           docker push registry-service.arc-systems.svc.cluster.local:5000/my-app:${{ github.sha }}
+          
+          echo "--- Testing hostAliases Name (registry.local) ---"
+          docker push registry.local:5000/my-app:${{ github.sha }}
+          
+          echo "--- Testing Direct ClusterIP ---"
           docker push 10.108.206.244:5000/my-app:${{ github.sha }}
-
